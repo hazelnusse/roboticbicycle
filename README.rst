@@ -18,6 +18,7 @@ The following is a list of the electrical hardware used on the bicycle:
 - Microcontroller:
     - `Olimex STM32 P-103 <http://www.olimex.com/dev/pdf/ARM/ST/STM32-P103.pdf>`_
     - `STM32F103RB Datasheet <http://www.st.com/internet/com/TECHNICAL_RESOURCES/TECHNICAL_LITERATURE/DATASHEET/CD00161566.pdf>`_
+    - `STM32F103RB Reference Manual <http://www.st.com/internet/com/TECHNICAL_RESOURCES/TECHNICAL_LITERATURE/REFERENCE_MANUAL/CD00171190.pdf>`_
 - JTAG Cable: `Olimex ARM-USB-TINY-H <http://www.olimex.com/dev/arm-usb-tiny-h.html>`_
 - Wireless Radio: `XBee Pro <http://ftp1.digi.com/support/documentation/90000982_B.pdf>`_
 - SPI Quadrature Counters: `LS7366R <http://www.lsicsi.com/pdfs/Data_Sheets/LS7366R.pdf>`_
