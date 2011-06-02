@@ -14,6 +14,7 @@ Peripherals Used on STM32F013RB
 - SPI2:  SD Card
 - USART1: XBee wireless radio
 - TIM2,3:  PWM output to Motor controllers
+
   -- Must be on 5.0V tolerant pins
   -- Outputs must be configured to open-drain
   -- PWM frequency must be in 1-100kHz range.
