@@ -9,7 +9,7 @@ The following is a list of the electrical hardware used on the bicycle:
 - Steer Motor Controller: `Accelnet Panel ADP-090-36 <http://www.copleycontrols.com/motion/pdf/Accelnet_Panel_ADP.pdf>`_
 - Rear hub motor Controller: `Accelnet Micro Panel ACJ-055-18 <http://www.copleycontrols.com/motion/pdf/Accelnet_Micro_Panel.pdf>`_
 - Steer motor: `Teknic M-3441 <http://www.teknic.com/files/product_info/N34_Industrial_Grade_Motors_v3.2.pdf>`_
-- Rear hub motor: `Amped Bikes Rear Geared Kit <http://ampedbikes.com/kits.html>`_
+- Geared (4.7:1) rear hub motor: `Amped Bikes Rear Geared Kit <http://ampedbikes.com/kits.html>`_
 - Wheel Encoders: `US Digital H5-50-N-D <http://usdigital.com/assets/general/119_h5_datasheet_1.pdf>`_
 - Inertial Measurement Unit:
     - `VectorNav VN-100 development board <http://www.vectornav.com/Downloads/Support/UM002.pdf>`_
