@@ -31,7 +31,7 @@ Resources
 - `STM32/ARM Cortex-M3 HOWTO: Development under Ubuntu <http://fun-tech.se/stm32/index.php>`_
 - `Sourcery G++ Lite 2011.03-42 for ARM EABI <http://www.codesourcery.com/sgpp/lite/arm/portal/release1802>`_
 - `OpenOCD:  <http://openocd.berlios.de/web/>`_
-- `STM32 Standand Peripherals Library: <http://www.st.com/internet/com/SOFTWARE_RESOURCES/SW_COMPONENT/FIRMWARE/stm32f2xx_stdperiph_lib.zip>`_
+- `STM32 Standand Peripherals Library: <http://www.st.com/internet/com/SOFTWARE_RESOURCES/SW_COMPONENT/FIRMWARE/stm32f10x_stdperiph_lib.zip>`_
 
 
 GNU ARM Toolchain
