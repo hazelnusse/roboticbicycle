@@ -7,4 +7,8 @@ set(CMAKE_EXE_LINKER_FLAGS "-nostartfiles -T${PROJECT_SOURCE_DIR}/scripts/stm_p1
 
 add_definitions(-DSTM32F10X_MD)
 add_executable(main_c main.c)
+objcopy_file(main_c)
+objdump_file(main_c)
 add_executable(main_cpp main.cpp)
+objcopy_file(main_cpp)
+objdump_file(main_cpp)
