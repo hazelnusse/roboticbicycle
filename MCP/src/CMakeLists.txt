@@ -10,3 +10,7 @@ add_definitions(-DSTM32F10X_CL)
 add_executable(blinky blinky.cpp)
 objcopy_file(blinky)
 objdump_file(blinky)
+
+add_executable(pwm_test pwm_test.cpp)
+objcopy_file(pwm_test)
+objdump_file(pwm_test)
