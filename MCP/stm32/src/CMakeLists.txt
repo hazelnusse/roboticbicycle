@@ -3,9 +3,11 @@ include_directories(${PROJECT_SOURCE_DIR}/stm32/inc)
 
 set(CMAKE_C_FLAGS "-Wall -fno-common -mcpu=cortex-m3 -mthumb -D'assert_param(expr)=((void)0)'")
 
-set(CMAKE_EXE_LINKER_FLAGS "-nostartfiles -T${PROJECT_SOURCE_DIR}/scripts/stm_p103_blink_rom.cmd")
+#set(CMAKE_EXE_LINKER_FLAGS "-nostartfiles -T${PROJECT_SOURCE_DIR}/scripts/stm_p103_blink_rom.cmd")
 
-add_definitions(-DSTM32F10X_MD)
+# Define the target CPU, see stm32f10x.h for more details
+add_definitions(-D${STM32_Device})
+
 add_library(stm32
     core_cm3.c
     system_stm32f10x.c

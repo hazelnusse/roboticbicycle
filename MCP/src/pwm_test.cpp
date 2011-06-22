@@ -1,11 +1,27 @@
 #include "stm32f10x.h"
 #define STACK_TOP 0x20002000
 
-void delay(void)
-{
-  // About 1/4 second delay
-  for (int i = 0; i < 100000; ++i);
-}
+// Forward declarations
+int main(void);
+void nmi_handler(void);
+void hardfault_handler(void);
+void delay(void);
+
+// This is essentially the vector table.  The
+// __attribute__((section("vectors")) ensures the linker puts the stack and the
+// address to main in the first two memory address of flash, which is how the
+// STM32 wants to boot.
+// The compiler will autogenerate nmi_handler and hardfault_handler functions
+// if we don't provide them, so lets provide them as void functions that take
+// no parameters, do nothing, and return nothing.
+unsigned int * myvectors[4]
+  __attribute__ ((section("vectors"))) =
+  {
+    (unsigned int *)    STACK_TOP,
+    (unsigned int *)    main,
+    (unsigned int *)    nmi_handler,
+    (unsigned int *)    hardfault_handler
+  };
 
 int main(void)
 {
@@ -46,15 +62,21 @@ int main(void)
     delay();                    // A short delay
     GPIOC->BSRR = 1 << 6;       // Set PC6
   } // while
+} // main
+
+void delay(void)
+{
+  // About 1/4 second delay
+  for (int i = 0; i < 100000; ++i);
+} // delay
+
+
+void nmi_handler(void)
+{
+  return;
 }
 
-// This is essentially the vector table.  The
-// __attribute__((section("vectors")) ensures the linker puts the stack and the
-// address to main in the first two memory address of flash, which is how the
-// STM32 wants to boot.
-unsigned int * myvectors[2]
-  __attribute__ ((section("vectors"))) =
-  {
-    (unsigned int *)    STACK_TOP,
-    (unsigned int *)    main
-  };
+void hardfault_handler(void)
+{
+  return;
+}
