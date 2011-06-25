@@ -18,3 +18,7 @@ target_link_libraries(enc_test stm32)
 objcopy_file(enc_test)
 objdump_file(enc_test)
 
+add_executable(spi_test spi_test.cpp startup_${STM32_Device}.s)
+target_link_libraries(spi_test stm32)
+objcopy_file(spi_test)
+objdump_file(spi_test)
