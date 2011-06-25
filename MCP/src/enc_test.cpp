@@ -49,9 +49,8 @@ void TIM4Setup(void)
                              TIM_EncoderMode_TI12,
                              TIM_ICPolarity_BothEdge,
                              TIM_ICPolarity_BothEdge);
-  TIM4->CCMR1 = 0x2121; // Enable digital filtering
-
-  // TIM_ARRPreloadConfig(TIM4, ENABLE);
+  // Enable digital filtering, see page 379 of RM0008
+  TIM4->CCMR1 |= (1 << 5) | (1 << 13);
 }
 
 int main(void)
