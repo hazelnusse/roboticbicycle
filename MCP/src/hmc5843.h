@@ -1,4 +1,3 @@
-
 #ifndef HMC5843_H
 #define HMC5843_H
 
