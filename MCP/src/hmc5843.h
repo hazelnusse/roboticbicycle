@@ -1,8 +1,8 @@
 #ifndef HMC5843_H
 #define HMC5843_H
 
-#define HMC_ADDR_R ((uint8_t)0x3D)     // 8-bit Read address
 #define HMC_ADDR_W ((uint8_t)0x3C)     // 8-bit Write address
+#define HMC_ADDR_R ((uint8_t)0x3D)     // 8-bit Read address
 
 // Register definitions
 #define HMC_CRA    ((uint8_t)0x00)     // Configuration Register A
@@ -31,7 +31,6 @@
 #define      ONE_HZ    DO0
 #define      TWO_HZ    DO1
 #define     FIVE_HZ    (DO0 | DO1)
-#define      TEN_HZ    DO2
 #define      TEN_HZ    DO2
 #define   TWENTY_HZ    (DO2 | DO0)
 #define    FIFTY_HZ    (DO2 | DO1)
