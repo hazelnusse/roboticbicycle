@@ -50,13 +50,15 @@ void I2C_Configuration(void)
   I2C_InitTypeDef I2C_InitStructure;
 
   // Disable I2C1 before changing any of the settings
-  I2C_DeInit(I2C1);
+  // I2C_DeInit(I2C1);
   I2C_Cmd(I2C1, DISABLE);
 
   // Populate 6 fields of I2C_InitStructure
-  I2C_InitStructure.I2C_ClockSpeed = 400000;  // 400kHz
-  I2C_InitStructure.I2C_Mode = I2C_Mode_I2C; // I2C mode
-  I2C_InitStructure.I2C_DutyCycle = I2C_DutyCycle_16_9;  // Doesn't matter unless we are in fast mode
+  I2C_InitStructure.I2C_ClockSpeed = 400000;        // I2C clock frequency
+  I2C_InitStructure.I2C_Mode = I2C_Mode_I2C;        // I2C mode
+  // Changing this actually changes the attainable clock frequencies
+  // due to some internal I2C clock divide
+  I2C_InitStructure.I2C_DutyCycle = I2C_DutyCycle_2;
   I2C_InitStructure.I2C_OwnAddress1 = 0x00;           // Doesn't matter
   I2C_InitStructure.I2C_Ack = I2C_Ack_Enable;         // Enable ACK on 9th clock cycle
   I2C_InitStructure.I2C_AcknowledgedAddress = I2C_AcknowledgedAddress_7bit;
@@ -83,14 +85,18 @@ void GPIO_Configuration(void)
 {
   GPIO_InitTypeDef GPIO_InitStructure;
 
-  // Configure PB6, PB7 to alternate function open drain mode, 50MHz
+  // Configure PB6, PB7 to alternate function
+  // - alternate function
+  // - open drain mode
+  // - 2MHz, rise time is controlled by external pull-ups, fall time is still <
+  // 125ns when in 2MHz mode, and will have lower overshoot and "ringing"
   GPIO_InitStructure.GPIO_Pin = GPIO_Pin_6 | GPIO_Pin_7;
-  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
   GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_OD;
+  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
   GPIO_Init(GPIOB, &GPIO_InitStructure);
 
   // Set SCL and SDA, this should release both lines to be high
-  GPIOB->BSRR = 0x00C0;
+  // GPIOB->BSRR = 0x00C0;
 }
 
 // Writes to CRA, CRB, and MR to put the HMC5843L in the following mode
