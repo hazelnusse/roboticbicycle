@@ -1,5 +1,5 @@
-#ifndef HMC5843_H
-#define HMC5843_H
+#ifndef HMC5843_REG_H
+#define HMC5843_REG_H
 
 #define HMC_ADDR_W ((uint8_t)0x3C)     // 8-bit Write address
 #define HMC_ADDR_R ((uint8_t)0x3D)     // 8-bit Read address

@@ -1,8 +1,15 @@
-#ifndef ITG3200_H
-#define ITG3200_H
+#ifndef ITG3200_REG_H
+#define ITG3200_REG_H
 
-#define ITG_ADDR_W              ((uint8_t)0x68)  // 8-bit Write address
-#define ITG_ADDR_R              ((uint8_t)0x69)  // 8-bit Read address
+#if ITG_AD0 == 0
+#define ITG_ADDR_W              ((uint8_t)0xD0)  // 8-bit Write address
+#define ITG_ADDR_R              ((uint8_t)0xD1)  // 8-bit Read address
+#elif ITG_AD0 == 1
+#define ITG_ADDR_W              ((uint8_t)0xD2)  // 8-bit Write address
+#define ITG_ADDR_R              ((uint8_t)0xD3)  // 8-bit Read address
+#else
+#error "Please #define ITG_AD0 to be 0 or 1 in accorandance with the state of ITG-3200 pin 9"
+#endif
 
 // Register definitions
 #define ITG_WHO_AM_I            ((uint8_t)0x00)

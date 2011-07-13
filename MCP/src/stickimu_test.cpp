@@ -3,12 +3,14 @@
 #include "stm32f10x_gpio.h"
 #include "stm32f10x_tim.h"
 #include "stm32f10x_i2c.h"
-#include "hmc5843.h"
+#include "HMC5843_REG.h"
+#include "ITG3200_REG.h"
 
 // extern void I2C1_EV_IRQHandler(void);
 //void I2C1_ER_IRQHandler(void);
 void GPIO_Configuration(void);
 void HMC_Configuration(void);
+void ITG_Configuration(void);
 void HMC_Verify_Configuration(uint8_t * data);
 void HMC_ReadXYZ(uint8_t * data);
 void RCC_Configuration(void);
@@ -23,12 +25,14 @@ int main(void)
 
   // Setup HMC
   HMC_Configuration();
+  // Setup ITG
+  ITG_Configuration();
 
   // Read data
-  //int16_t data[3] = {0, 0, 0};
-  uint8_t data[9] = {2};
+  uint8_t HMC5843_data[9];
+  uint8_t ITG3200_data[8];
   while (1) {
-    HMC_Verify_Configuration(data);
+    HMC_Verify_Configuration(HMC5843_data);
     // HMC_ReadXYZ((uint8_t *) data);
     delay(1000);
   }
@@ -146,7 +150,7 @@ void HMC_Verify_Configuration(uint8_t * data)
   // Generate a I2C Start condition (Master pulls SDA LOW while SCL is HIGH)
   I2C_GenerateSTART(I2C1, ENABLE);
   while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_MODE_SELECT)) {}
-  
+
   // Send the HMC Write address
   I2C1->DR = HMC_ADDR_W;
   while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED)) {}
@@ -174,8 +178,6 @@ void HMC_Verify_Configuration(uint8_t * data)
   data[8] = (uint8_t) I2C1->DR;
 }
 
-
-
 void HMC_ReadXYZ(uint8_t * data)
 {
   // Wait for the I2C lines to be free
@@ -198,6 +200,52 @@ void HMC_ReadXYZ(uint8_t * data)
   I2C_GenerateSTOP(I2C1, ENABLE);
   while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_BYTE_RECEIVED)) {}
   data[5] = (uint8_t) I2C1->DR;
+}
+
+
+void ITG_Configuration(void)
+{
+  // Wait for the I2C lines to be free
+  while (I2C_GetFlagStatus(I2C1, I2C_FLAG_BUSY)) {}
+
+  // Generate a I2C Start condition (Master pulls SDA LOW while SCL is HIGH)
+  I2C_GenerateSTART(I2C1, ENABLE);
+  while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_MODE_SELECT)) {}
+
+  // Send the ITG Write address
+  I2C1->DR = ITG_ADDR_W;
+  while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED)) {}
+
+  // Send the address of SMPLRT_DIV
+  I2C1->DR = ITG_SMPLRT_DIV;
+  while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_BYTE_TRANSMITTING)) {}
+
+  // Sample Rate Divider
+  I2C1->DR = (uint8_t) 0;
+  while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_BYTE_TRANSMITTING)) {}
+
+  // Set Digital Low Pass Filter
+  I2C1->DR = ITG_DLPF_188;
+  while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_BYTE_TRANSMITTING)) {}
+
+  // Generate a I2C Repeated start condition
+  I2C_GenerateSTART(I2C1, ENABLE);
+  while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_MODE_SELECT)) {}
+
+  // Send the HMC Write address
+  I2C1->DR = ITG_ADDR_W;
+  while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED)) {}
+
+  // Send the address of PWR_MGM
+  I2C1->DR = ITG_PWR_MGM;
+  while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_BYTE_TRANSMITTING)) {}
+
+  // Select the X Gyro as the source for the PLL
+  I2C1->DR = ITG_CLK_SEL_PLL_X_GYRO;
+  while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_BYTE_TRANSMITTING)) {}
+
+  // Generate a I2C Stop condition (Master releases SDA while SCL is HIGH)
+  I2C_GenerateSTOP(I2C1, ENABLE);
 }
 
 extern "C" {
