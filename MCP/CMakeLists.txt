@@ -11,7 +11,7 @@ set(CMAKE_BUILD_TYPE "Debug")
 # gdb has 3 levels of debugging symbol support -- gdb3 includes all the symbols
 # including those defined with preprocessor macros (#define)!!!  This means all
 # the symbols in stm32f10x.h can be used directly within gdb
-set(CMAKE_C_FLAGS_DEBUG "-Wall -fno-common -mcpu=cortex-m3 -mthumb -D'assert_param(expr)=((void)0)' -ggdb3 -O0 -ffunction-sections -fdata-sections -Wl,--gc-sections -fno-exceptions")
+set(CMAKE_C_FLAGS_DEBUG "-Wall -fno-common -mcpu=cortex-m3 -march=armv7-m -mthumb -D'assert_param(expr)=((void)0)' -ggdb3 -O0 -ffunction-sections -fdata-sections -Wl,--gc-sections -fno-exceptions")
 
 set(CMAKE_CXX_FLAGS_DEBUG ${CMAKE_C_FLAGS_DEBUG})
 
