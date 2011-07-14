@@ -9,13 +9,17 @@
 // extern void I2C1_EV_IRQHandler(void);
 //void I2C1_ER_IRQHandler(void);
 void GPIO_Configuration(void);
-void HMC_Configuration(void);
-void ITG_Configuration(void);
-void HMC_Verify_Configuration(uint8_t * data);
-void HMC_ReadXYZ(uint8_t * data);
 void RCC_Configuration(void);
 void I2C_Configuration(void);
 void delay(int N);
+
+void HMC_Configuration(void);
+void HMC_Verify_Configuration(uint8_t * data);
+void HMC_ReadXYZ(uint8_t * data);
+
+void ITG_Configuration(void);
+void ITG_Verify_Configuration(uint8_t * data);
+void ITG_ReadXYZ(void);
 
 int main(void)
 {
@@ -110,6 +114,7 @@ void GPIO_Configuration(void)
 // -- Continuous - Conversion mode
 void HMC_Configuration(void)
 {
+  using namespace hmc5843;
   // Wait for the I2C lines to be free
   while (I2C_GetFlagStatus(I2C1, I2C_FLAG_BUSY)) {}
 
@@ -118,11 +123,11 @@ void HMC_Configuration(void)
   while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_MODE_SELECT)) {}
 
   // Send the HMC Write address
-  I2C1->DR = HMC_ADDR_W;
+  I2C1->DR = ADDR_W;
   while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED)) {}
 
   // Send the address of Configuration Register A
-  I2C1->DR = HMC_CRA;
+  I2C1->DR = CRA;
   while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_BYTE_TRANSMITTING)) {}
 
   // 50 Hz, Normal Mode
@@ -143,6 +148,7 @@ void HMC_Configuration(void)
 
 void HMC_Verify_Configuration(uint8_t * data)
 {
+  using namespace hmc5843;
   I2C_AcknowledgeConfig(I2C1, ENABLE);
   // Wait for the I2C lines to be free
   while (I2C_GetFlagStatus(I2C1, I2C_FLAG_BUSY)) {}
@@ -152,11 +158,11 @@ void HMC_Verify_Configuration(uint8_t * data)
   while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_MODE_SELECT)) {}
 
   // Send the HMC Write address
-  I2C1->DR = HMC_ADDR_W;
+  I2C1->DR = ADDR_W;
   while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED)) {}
 
   // Send the address of Configuration Register A
-  I2C1->DR = HMC_CRA;
+  I2C1->DR = CRA;
   while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_BYTE_TRANSMITTING)) {}
 
   // Send a repeated start
@@ -164,7 +170,7 @@ void HMC_Verify_Configuration(uint8_t * data)
   while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_MODE_SELECT)) {}
 
   // Send the HMC Read address
-  I2C1->DR = HMC_ADDR_R;
+  I2C1->DR = ADDR_R;
   while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_RECEIVER_MODE_SELECTED)) {}
 
   // Need to check that master sends an ACK (low byte)
@@ -180,6 +186,7 @@ void HMC_Verify_Configuration(uint8_t * data)
 
 void HMC_ReadXYZ(uint8_t * data)
 {
+  using namespace hmc5843;
   // Wait for the I2C lines to be free
   while (I2C_GetFlagStatus(I2C1, I2C_FLAG_BUSY)) {}
 
@@ -188,7 +195,7 @@ void HMC_ReadXYZ(uint8_t * data)
   while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_MODE_SELECT)) {}
 
   // Send the HMC Read address
-  I2C1->DR = HMC_ADDR_R;
+  I2C1->DR = ADDR_R;
   while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_RECEIVER_MODE_SELECTED)) {}
 
   // Need to check that master sends an ACK (low byte)

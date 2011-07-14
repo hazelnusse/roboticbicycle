@@ -1,6 +1,7 @@
 #ifndef ITG3200_REG_H
 #define ITG3200_REG_H
 
+// I2C Slave Address Depends on state of AD0, pin 9
 #if ITG_AD0 == 0
 #define ITG_ADDR_W              ((uint8_t)0xD0)  // 8-bit Write address
 #define ITG_ADDR_R              ((uint8_t)0xD1)  // 8-bit Read address
