@@ -8,7 +8,7 @@ macro(OBJCOPY_FILE EXE_NAME)
   ARGS -O binary ${FI} ${FO}
   DEPENDS ${FI})
  get_filename_component(TGT "${EXE_NAME}" NAME)
- add_custom_target("TargetObjCopy_${TGT}" ALL DEPENDS ${FO} VERBATIM)
+ add_custom_target("${TGT}.bin" ALL DEPENDS ${FO} VERBATIM)
  get_directory_property(extra_clean_files ADDITIONAL_MAKE_CLEAN_FILES)
  set_directory_properties(
   PROPERTIES
@@ -26,7 +26,7 @@ macro(OBJDUMP_FILE EXE_NAME)
   ARGS -S ${FI} > ${FO}
   DEPENDS ${FI})
  get_filename_component(TGT "${EXE_NAME}" NAME)
- add_custom_target("TargetObjDump_${TGT}" ALL DEPENDS ${FO} VERBATIM)
+ add_custom_target("${TGT}.list" ALL DEPENDS ${FO} VERBATIM)
  get_directory_property(extra_clean_files ADDITIONAL_MAKE_CLEAN_FILES)
  set_directory_properties(
   PROPERTIES
