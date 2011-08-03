@@ -280,10 +280,12 @@ void ITG_Configuration(void)
   I2C1->DR = DLPF_188;
   while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_BYTE_TRANSMITTING)) {}
 
-  // Set Digital Low Pass Filter
-  I2C1->DR = INT_ANYRD_2CLEAR | ACTL;
+  // Configure INT_CFG
+  // I2C1->DR = INT_ANYRD_2CLEAR | ACTL;
+  // Latch interrupts until any register is read, enable data interrupts.
+  // Default interrupt pin mode is push-pull, active high
+  I2C1->DR = LATCH_INT_EN | INT_ANYRD_2CLEAR | RAW_RDY_EN;
   while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_BYTE_TRANSMITTED)) {}
-  // Configure INT_CFG here....
 
   // Generate a I2C Repeated start condition
   I2C_GenerateSTART(I2C1, ENABLE);
