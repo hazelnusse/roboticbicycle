@@ -81,4 +81,4 @@ namespace hmc5883l {
 
 }; // namespace hmc5843
 
-#endif  // HMC5843_REG_H
+#endif  // HMC5883L_REG_H
