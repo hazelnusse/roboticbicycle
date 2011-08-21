@@ -37,11 +37,11 @@ void RCC_Configuration(void)
 void TIM4Setup(void)
 {
   TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;
-  TIM_TimeBaseInit(&TIM_TimeBaseStructure);
-  //TIM_TimeBaseStructure.TIM_Period = 0x3FFF;  // 2^14 - 1
-  //TIM_TimeBaseStructure.TIM_Prescaler = 0;
-  //TIM_TimeBaseStructure.TIM_ClockDivision = 0;
-  //TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
+  // TIM_TimeBaseInit(&TIM_TimeBaseStructure);
+  TIM_TimeBaseStructure.TIM_Period = 0x3FFF;  // 2^14 - 1
+  TIM_TimeBaseStructure.TIM_Prescaler = 0;
+  TIM_TimeBaseStructure.TIM_ClockDivision = 0;
+  TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
 
   TIM_TimeBaseInit(TIM4, &TIM_TimeBaseStructure);
 
