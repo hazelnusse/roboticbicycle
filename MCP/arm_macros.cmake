@@ -23,7 +23,7 @@ macro(OBJDUMP_FILE EXE_NAME)
  add_custom_command(
   OUTPUT "${FO}"
   COMMAND ${CMAKE_OBJDUMP}
-  ARGS -S ${FI} > ${FO}
+  ARGS -h -S -C -r ${FI} > ${FO}
   DEPENDS ${FI})
  get_filename_component(TGT "${EXE_NAME}" NAME)
  add_custom_target("${TGT}.list" ALL DEPENDS ${FO} VERBATIM)
