@@ -1,31 +1,32 @@
-project(MCP ASM CXX C)
+project(MCP ASM C CXX)
 cmake_minimum_required(VERSION 2.8)
+include(${PROJECT_SOURCE_DIR}/arm_macros.cmake)
 
-# Option to Build for different targets
-set(STM32_Device "STM32F10X_CL" CACHE STRING "Target STM32 Device")
-set_property(CACHE STM32_Device PROPERTY STRINGS STM32F10X_MD)
+MESSAGE("CMAKE_SYSTEM_INCLUDE_PATH=${CMAKE_SYSTEM_INCLUDE_PATH}")
+MESSAGE("CMAKE_SYSTEM_LIBRARY_PATH=${CMAKE_SYSTEM_LIBRARY_PATH}")
+MESSAGE("CMAKE_SYSTEM_PROGRAM_PATH=${CMAKE_SYSTEM_PROGRAM_PATH}")
 
 # Make "Debug" the default build option
-set(CMAKE_BUILD_TYPE "Debug")
+set(CMAKE_BUILD_TYPE "Release")
 
-# gdb has 3 levels of debugging symbol support -- gdb3 includes all the symbols
-# including those defined with preprocessor macros (#define)!!!  This means all
-# the symbols in stm32f10x.h can be used directly within gdb
-set(CMAKE_C_FLAGS_DEBUG "-Wall -fno-common -mcpu=cortex-m3 -march=armv7-m -mthumb -D'assert_param(expr)=((void)0)' -ggdb3 -O0 -ffunction-sections -fdata-sections -Wl,--gc-sections -fno-exceptions")
+# C and C++ flags
+SET(C_CPP_FLAGS "-Wabi -Wall -Wextra -Wcast-align -Wpointer-arith -Wredundant-decls -Wshadow -Wcast-qual -W -Winline -ffunction-sections -fdata-sections")
+# C only flags
+SET(C_ONLY_FLAGS "-Wimplicit -Wnested-externs -std=gnu99")
+# C++ only Flags
+SET(CPP_ONLY_FLAGS "-fno-rtti -fno-exceptions -std=gnu++0x")
 
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -std=c++0x")
+# Debug flags
+set(CMAKE_C_FLAGS_DEBUG "${C_CPP_FLAGS} ${C_ONLY_FLAGS} -ggdb3 -O0")
+set(CMAKE_CXX_FLAGS_DEBUG "${C_CPP_FLAGS} ${CPP_ONLY_FLAGS} -ggdb3 -O0")
+set(CMAKE_ASM_FLAGS_DEBUG "-Wa,-ggdb3")
 
-# Assembly Flags
-set(CMAKE_ASM_FLAGS_DEBUG "-ggdb3 -mcpu=cortex-m3 -mthumb")
+# Release flags
+set(CMAKE_C_FLAGS_RELEASE "${C_CPP_FLAGS} ${C_ONLY_FLAGS} -ggdb3 -O3")
+set(CMAKE_CXX_FLAGS_RELEASE "${C_CPP_FLAGS} ${CPP_ONLY_FLAGS} -ggdb3 -O3")
 
 # Linker Flags
-set(CMAKE_EXE_LINKER_FLAGS "-T${PROJECT_SOURCE_DIR}/src/${STM32_Device}.ld -nostartfiles")
-
-# CMake module path
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR})
-
-# object-copy and object dump CMake macros
-include(arm_macros)
+set(CMAKE_EXE_LINKER_FLAGS "-Wl,--gc-sections -T${PROJECT_SOURCE_DIR}/src/${STM32_Device}.ld")
 
 # Add subdirectories
 add_subdirectory(stm32)
