@@ -61,6 +61,8 @@ SECTIONS
         *(COMMON)
         . = ALIGN(4);
         _ebss = .;
+        _end = .;
+        __end = .;
     } >sram
 
     /DISCARD/ : { *(.eh_frame) }
