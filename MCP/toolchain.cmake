@@ -2,7 +2,6 @@ include(CMakeForceCompiler)
 
 set(CMAKE_SYSTEM_NAME arm_cm3.cmake)
 set(CMAKE_SYSTEM_PROCESSOR arm-none-eabi)
-set(STM32_Device STM32F10X_CL)
 
 # Set the location of your ARM toolchain
 set(ARM_NONE_EABI_DIR $ENV{HOME}/usr/arm_cm3)
