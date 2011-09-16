@@ -16,7 +16,9 @@ CMAKE_FORCE_CXX_COMPILER(${ARM_NONE_EABI_DIR}/bin/arm-none-eabi-g++ GNU)
 
 # Flags that are specific to the STM32 Connectivity line chip and are needed
 # regardless of whether we are compiling C or C++ code.
-SET(CM3_SPECIAL_FLAGS "-mcpu=cortex-m3 -mtune=cortex-m3 -march=armv7-m -mthumb -mthumb-interwork -D'assert_param(expr)=((void)0)' -D${STM32_Device}")
+SET(CM3_SPECIAL_FLAGS "-mcpu=cortex-m3 -mtune=cortex-m3 -march=armv7-m -mthumb")
+# I don't think this option is needed: -mthumb-interwork")
+# TODO: Figure out if Thumb-2 instructions are being properly generated.
 
 SET(CMAKE_CXX_COMPILE_OBJECT "<CMAKE_CXX_COMPILER> ${CM3_SPECIAL_FLAGS} <DEFINES> <FLAGS> -o <OBJECT> -c <SOURCE>")
 SET(CMAKE_C_COMPILE_OBJECT "<CMAKE_C_COMPILER> ${CM3_SPECIAL_FLAGS} <DEFINES> <FLAGS> -o <OBJECT> -c <SOURCE>")
