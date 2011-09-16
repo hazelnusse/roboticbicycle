@@ -7,14 +7,14 @@ MESSAGE("CMAKE_SYSTEM_LIBRARY_PATH=${CMAKE_SYSTEM_LIBRARY_PATH}")
 MESSAGE("CMAKE_SYSTEM_PROGRAM_PATH=${CMAKE_SYSTEM_PROGRAM_PATH}")
 
 # Make "Debug" the default build option
-set(CMAKE_BUILD_TYPE "Release")
+set(CMAKE_BUILD_TYPE "Debug")
 
 # C and C++ flags
-SET(C_CPP_FLAGS "-Wabi -Wall -Wextra -Wcast-align -Wpointer-arith -Wredundant-decls -Wshadow -Wcast-qual -W -Winline -ffunction-sections -fdata-sections")
+SET(C_CPP_FLAGS "-D'assert_param(expr)=((void)0)' -D${STM32_Device} -Wabi -Wall -Wextra -Wcast-align -Wpointer-arith -Wredundant-decls -Wshadow -Wcast-qual -W -Winline -ffunction-sections -fdata-sections")
 # C only flags
 SET(C_ONLY_FLAGS "-Wimplicit -Wnested-externs -std=gnu99")
 # C++ only Flags
-SET(CPP_ONLY_FLAGS "-fno-rtti -fno-exceptions -std=gnu++0x")
+SET(CPP_ONLY_FLAGS "-fno-rtti -fno-exceptions -std=c++0x -Weffc++")
 
 # Debug flags
 set(CMAKE_C_FLAGS_DEBUG "${C_CPP_FLAGS} ${C_ONLY_FLAGS} -ggdb3 -O0")
