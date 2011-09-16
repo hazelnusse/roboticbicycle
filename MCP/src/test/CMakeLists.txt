@@ -1,0 +1,61 @@
+include_directories(${PROJECT_SOURCE_DIR}/stm32/inc
+                    ${PROJECT_SOURCE_DIR}/inc
+                    ${PROJECT_SOURCE_DIR}/src)
+
+add_executable(test_sample test_sample.cc ../startup_${STM32_Device}.s)
+target_link_libraries(test_sample stm32 measurement)
+objcopy_file(test_sample)
+objdump_file(test_sample)
+symbol_table(test_sample)
+
+add_executable(test_startup test_startup.cc ../startup_${STM32_Device}.s)
+target_link_libraries(test_startup stm32)
+objcopy_file(test_startup)
+objdump_file(test_startup)
+symbol_table(test_startup)
+
+# This uses new and delete and ends up bloating the code to about 60kb and
+# requires a bunch of newlib system calls.... bad bad bad
+#add_executable(test_myclasses test_myclasses.cc myclasses.cc syscalls.c ../startup_${STM32_Device}.s)
+#target_link_libraries(test_myclasses stm32)
+#objcopy_file(test_myclasses)
+#objdump_file(test_myclasses)
+#symbol_table(test_myclasses)
+
+add_executable(test_floatingpoint test_floatingpoint.cc ../startup_${STM32_Device}.s)
+target_link_libraries(test_floatingpoint stm32)
+objcopy_file(test_floatingpoint)
+objdump_file(test_floatingpoint)
+symbol_table(test_floatingpoint)
+
+add_executable(test_pwm test_pwm.cc ../startup_${STM32_Device}.s)
+target_link_libraries(test_pwm stm32)
+objcopy_file(test_pwm)
+objdump_file(test_pwm)
+symbol_table(test_pwm)
+
+add_executable(test_encoder test_encoder.cc ../startup_${STM32_Device}.s)
+target_link_libraries(test_encoder stm32)
+objcopy_file(test_encoder)
+objdump_file(test_encoder)
+symbol_table(test_encoder)
+
+add_executable(test_spi test_spi.cc ../startup_${STM32_Device}.s)
+target_link_libraries(test_spi stm32)
+objcopy_file(test_spi)
+objdump_file(test_spi)
+symbol_table(test_spi)
+
+add_executable(test_sections test_sections.cc ../startup_${STM32_Device}.s)
+target_link_libraries(test_sections stm32)
+objcopy_file(test_sections)
+objdump_file(test_sections)
+symbol_table(test_sections)
+
+add_executable(test_stickimu test_stickimu.cc ../startup_${STM32_Device}.s)
+set_target_properties(test_stickimu PROPERTIES
+        COMPILE_DEFINITIONS "ITG_AD0=0;ADXL_ALT_ADDRESS=0")
+target_link_libraries(test_stickimu stm32)
+objcopy_file(test_stickimu)
+objdump_file(test_stickimu)
+symbol_table(test_stickimu)
