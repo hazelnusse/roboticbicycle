@@ -38,3 +38,4 @@ set(CMAKE_EXE_LINKER_FLAGS "-Wl,--gc-sections -T${PROJECT_SOURCE_DIR}/${BUILD_TY
 # Add subdirectories
 add_subdirectory(stm32)
 add_subdirectory(src)
+add_subdirectory(FreeRTOS)

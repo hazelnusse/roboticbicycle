@@ -1,9 +1,7 @@
 include_directories(${PROJECT_SOURCE_DIR}/stm32/inc)
 
-#set(CMAKE_C_FLAGS "-Wall -fno-common -mcpu=cortex-m3 -mthumb -D'assert_param(expr)=((void)0)'")
-
 # Define the target CPU, see stm32f10x.h for more details
-add_definitions(-D${STM32_Device})
+#add_definitions(-D${STM32_Device})
 
 add_library(stm32
     core_cm3.c
