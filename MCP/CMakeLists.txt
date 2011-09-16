@@ -2,6 +2,13 @@ project(MCP ASM C CXX)
 cmake_minimum_required(VERSION 2.8)
 include(${PROJECT_SOURCE_DIR}/arm_macros.cmake)
 
+# This will
+set(STM32_Device STM32F10X_CL)
+
+set(BUILD_TYPE "${STM32_Device}_flash")
+# Uncomment to choose a ram build
+#set(BUILD_TYPE "${STM32_Device}_ram")
+
 MESSAGE("CMAKE_SYSTEM_INCLUDE_PATH=${CMAKE_SYSTEM_INCLUDE_PATH}")
 MESSAGE("CMAKE_SYSTEM_LIBRARY_PATH=${CMAKE_SYSTEM_LIBRARY_PATH}")
 MESSAGE("CMAKE_SYSTEM_PROGRAM_PATH=${CMAKE_SYSTEM_PROGRAM_PATH}")
@@ -25,8 +32,8 @@ set(CMAKE_ASM_FLAGS_DEBUG "-Wa,-ggdb3")
 set(CMAKE_C_FLAGS_RELEASE "${C_CPP_FLAGS} ${C_ONLY_FLAGS} -ggdb3 -O3")
 set(CMAKE_CXX_FLAGS_RELEASE "${C_CPP_FLAGS} ${CPP_ONLY_FLAGS} -ggdb3 -O3")
 
-# Linker Flags
-set(CMAKE_EXE_LINKER_FLAGS "-Wl,--gc-sections -T${PROJECT_SOURCE_DIR}/src/${STM32_Device}.ld")
+# Executable linker Flags
+set(CMAKE_EXE_LINKER_FLAGS "-Wl,--gc-sections -T${PROJECT_SOURCE_DIR}/${BUILD_TYPE}.ld")
 
 # Add subdirectories
 add_subdirectory(stm32)
