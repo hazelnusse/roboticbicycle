@@ -1,7 +1,3 @@
-include_directories(${PROJECT_SOURCE_DIR}/stm32/inc
-                    ${PROJECT_SOURCE_DIR}/inc
-                    ${PROJECT_SOURCE_DIR}/src)
-
 add_executable(test_sample test_sample.cc ../startup_${STM32_Device}.s)
 target_link_libraries(test_sample stm32 measurement)
 objcopy_file(test_sample)
