@@ -1,79 +1,145 @@
+/*
+Linker script for use with STM32F10x with 256k FLASH and 64k ram
+*/
+
+/* Program Entry, set to mark it as "used" and avoid garbage collection */
+ENTRY(Reset_Handler)
+
+/* Memory Spaces Definitions */
 MEMORY
 {
-    sram  (RWX) : ORIGIN = 0x20000000, LENGTH = 64k
-    flash  (RX) : ORIGIN = 0x08000000, LENGTH = 256k-2k
-    eemul (RWX) : ORIGIN = 0x08000000+256k-2k, LENGTH = 2k
+  SRAM  (RWX) : ORIGIN = 0x20000000, LENGTH = 64K
+  FLASH  (RX) : ORIGIN = 0x08000000, LENGTH = 256K
 }
 
+/* Highest address of the user mode stack */
+_estack = ORIGIN(SRAM)+LENGTH(SRAM);
+
+/* Check valid alignment for VTOR */
+ASSERT(ORIGIN(FLASH) == ALIGN(ORIGIN(FLASH), 0x200), "Start of memory region FLASH not aligned for startup vector table");
+
+/* Generate a link error if heap and stack don't fit into RAM */
+_Min_Heap_Size = 0;      /* required amount of heap  */
+_Min_Stack_Size = 0x100; /* required amount of stack */
+
+/* Define output sections */
 SECTIONS
 {
+  /* The startup code goes first into FLASH */
+  .isr_vector :
+  {
+    . = ALIGN(4);
+    KEEP(*(.isr_vector)) /* Startup code */
+    . = ALIGN(4);
+  } >FLASH
+
+  /* The program code and other data goes into FLASH */
   .text :
   {
     . = ALIGN(4);
-    _text = .;
-    /* PROVIDE(stext = .); */
-    KEEP(*(.isr_vector))
-    /*KEEP(*(.init))*/
-    *(.text .text.*)
-    *(.rodata .rodata.*)
-    /* *(.gnu.linkonce.t.*)
-    *(.glue_7)
-    *(.glue_7t)
-    *(.gcc_except_table)
-    *(.gnu.linkonce.r.*) */
-    . = ALIGN(4);
-    _etext = .;
-    _sidata = _etext;
-    /* PROVIDE(etext = .);
-    _fini = . ;
-    *(.fini) */
-  } > flash
+    *(.text)           /* .text sections (code) */
+    *(.text*)          /* .text* sections (code) */
+    *(.rodata)         /* .rodata sections (constants, strings, etc.) */
+    *(.rodata*)        /* .rodata* sections (constants, strings, etc.) */
+    *(.glue_7)         /* glue arm to thumb code */
+    *(.glue_7t)        /* glue thumb to arm code */
 
-  .data : AT (_etext)
-  {
-    . = ALIGN(4);
-    _sdata = .;
-    /**(.ramfunc .ramfunc.* .fastrun .fastrun.*)*/
-    *(.data .data.*)
-    /* *(.gnu.linkonce.d.*) doesn't occur unless c++ rtti is used */
-    . = ALIGN(4);
-    _edata = .;
-  } > sram
+    KEEP (*(.init))
+    KEEP (*(.fini))
 
-  /* This is for exception unwinding information.  We aren't using exceptions,
-   * so leave it out
+    . = ALIGN(4);
+    _etext = .;        /* define a global symbols at end of code */
+  } >FLASH
+
+
   .ARM.extab :
   {
-    *(.ARM.extab*)
-  } > sram
+    *(.ARM.extab* .gnu.linkonce.armextab.*)
+  } >FLASH
 
-  __exidx_start = .;
-  .ARM.exidx :
+  .ARM :
   {
+    __exidx_start = .;
     *(.ARM.exidx*)
-  } >sram
-  __exidx_end = .;
-  */
+    __exidx_end = .;
+  } >FLASH
 
-  .bss (NOLOAD) :
+  .ARM.attributes :
+  {
+    *(.ARM.attributes)
+  } > FLASH
+
+  .preinit_array :
+  {
+    PROVIDE_HIDDEN (__preinit_array_start = .);
+    KEEP (*(.preinit_array*))
+    PROVIDE_HIDDEN (__preinit_array_end = .);
+  } >FLASH
+
+  .init_array :
+  {
+    PROVIDE_HIDDEN (__init_array_start = .);
+    KEEP (*(SORT(.init_array.*)))
+    KEEP (*(.init_array*))
+    PROVIDE_HIDDEN (__init_array_end = .);
+  } >FLASH
+
+  .fini_array :
+  {
+    PROVIDE_HIDDEN (__fini_array_start = .);
+    KEEP (*(.fini_array*))
+    KEEP (*(SORT(.fini_array.*)))
+    PROVIDE_HIDDEN (__fini_array_end = .);
+  } >FLASH
+
+  /* used by the startup to initialize data */
+  _sidata = .;
+
+  /* Initialized data sections goes into RAM, load LMA copy after code */
+  .data : AT ( _sidata )
   {
     . = ALIGN(4);
-    /* This is used by the startup in order to initialize the .bss secion */
-    _sbss = .;
-    *(.bss .bss.*)
-    /* *(.gnu.linkonce.b.*) this section doesn't get used unless c++ rtti is
-     * used */
-    /* *(COMMON) */
+    _sdata = .;        /* create a global symbol at data start */
+    *(.data)           /* .data sections */
+    *(.data*)          /* .data* sections */
+
     . = ALIGN(4);
-    _ebss = .;
-    /*_end = .;*/
-    /*__end = .; */
-  } > sram
+    _edata = .;        /* define a global symbol at data end */
+  } >SRAM
 
-  /*
-  /DISCARD/ : { *(.eh_frame) }
-  */
+  /* Uninitialized data section */
+  . = ALIGN(4);
+  .bss :
+  {
+    /* This is used by the startup in order to initialize the .bss secion */
+    _sbss = .;         /* define a global symbol at bss start */
+    __bss_start__ = _sbss;
+    *(.bss)
+    *(.bss*)
+    *(COMMON)
 
-  /*end = .;*/
-  PROVIDE( _estack = 0x20010000 );
+    . = ALIGN(4);
+    _ebss = .;         /* define a global symbol at bss end */
+    __bss_end__ = _ebss;
+  } >SRAM
+
+  PROVIDE ( end = _ebss );
+  PROVIDE ( _end = _ebss );
+
+  /* User_heap_stack section, used to check that there is enough RAM left */
+  ._user_heap_stack :
+  {
+    . = ALIGN(4);
+    . = . + _Min_Heap_Size;
+    . = . + _Min_Stack_Size;
+    . = ALIGN(4);
+  } >SRAM
+
+  /* Remove information from the standard libraries */
+  /DISCARD/ :
+  {
+    libc.a ( * )
+    libm.a ( * )
+    libgcc.a ( * )
+  }
 }
