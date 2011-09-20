@@ -3,8 +3,12 @@ Master Control Progam
 
 Outline of code organization
 
-- inc/  header files
-- src/  implementation files
+- inc/      header files
+- src/      implementation files
+- stm32/    ST Microelectronics Standard Peripheral Library
+- FreeRTOS/  FreeRTOS real-time kernel
+- Platform/  cmake Platform folder
+- scripts/   openocd scripts
 
 CMake Notes
 ===========
@@ -17,22 +21,24 @@ to proceed properly, you must invoke cmake as follows::
 where <MCP_dir> is replaced with the actually path to the MCP directory that
 contains toolchain.cmake.
 
+OpenOCD Notes
+=============
+
+To connect to the board with openocd, you need to start openocd and give it the
+script file located in scripts::
+
+  $ openocd -f <MCP_dir>/scripts/openocd.cfg
+
+Then, start up gdb:
+
+  $ arm-none-eabi-gdb --eval-command="target remote localhost:3333"
 
 Peripherals Used on STM32F107
 -------------------------------
 
-- SPI1:  VN-100, 3 x SPI Digital Counters
 - SPI2:  SD Card
 - USART1: XBee wireless radio
-- TIM2,3:  PWM output to Motor controllers
-
-  - Must be on 5.0V tolerant pins
-  - Outputs must be configured to open-drain
-  - PWM frequency must be in 1-100kHz range.
-  - Inputs on Copley motor controller must be pulled up to 5.0V by selecting that option in software
-
-- 3 GPIO pins configured as open drain outputs to use as slave select
-  pins for the SPI digital counters.
-- 1 GPIO pin configured as input to use for DR_INT from VN-100
-
-
+- TIM1:  PWM output to Motor controllers
+- TIM3, TIM4, TIM5:  counters for steer, rear wheel, front wheel encoders
+- GPIOA, GPIOB, GPIOC, GPIOD, GPIOE, AFIO, some pins tied to I/O lines of above
+  peripherals, others pins used for GPIO purposes
