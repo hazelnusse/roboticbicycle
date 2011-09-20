@@ -5,6 +5,7 @@ set(CMAKE_SYSTEM_PROCESSOR arm-none-eabi)
 
 # Set the location of your ARM toolchain
 set(ARM_NONE_EABI_DIR $ENV{HOME}/usr/arm_cm3)
+#set(ARM_NONE_EABI_DIR $ENV{HOME}/CodeSourcery/Sourcery_G++_Lite)
 set(CMAKE_FIND_ROOT_PATH ${ARM_NONE_EABI_DIR})
 set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
 set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
