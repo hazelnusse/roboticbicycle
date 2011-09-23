@@ -55,3 +55,16 @@ target_link_libraries(test_stickimu stm32)
 objcopy_file(test_stickimu)
 objdump_file(test_stickimu)
 symbol_table(test_stickimu)
+
+add_executable(test_sizeof test_sizeof.cc ../startup_${STM32_Device}.s)
+target_link_libraries(test_sizeof stm32 FreeRTOS)
+objcopy_file(test_sizeof)
+objdump_file(test_sizeof)
+symbol_table(test_sizeof)
+
+add_executable(test_FreeRTOS test_FreeRTOS.cc ../startup_${STM32_Device}.s)
+target_link_libraries(test_FreeRTOS stm32 FreeRTOS)
+objcopy_file(test_FreeRTOS)
+objdump_file(test_FreeRTOS)
+symbol_table(test_FreeRTOS)
+
