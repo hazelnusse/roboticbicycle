@@ -1,5 +1,5 @@
 add_executable(test_sample test_sample.cc ../startup_${STM32_Device}.s)
-target_link_libraries(test_sample stm32 measurement)
+target_link_libraries(test_sample stm32)
 objcopy_file(test_sample)
 objdump_file(test_sample)
 symbol_table(test_sample)
