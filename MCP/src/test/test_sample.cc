@@ -7,8 +7,8 @@ int main(void)
 
   while(1)
   {
-    x = a.magX_MSB();
-    y = x + a.magX_LSB();
+    x = a.magX();
+    y = x + a.magY();
     z = x + y;
   }
 

@@ -6,6 +6,7 @@
 #include "stm32f10x_rcc.h"
 #include "stm32f10x_tim.h"
 // #include "bma180_reg.h"
+#include "itg3200_reg.h"
 
 static void configureUSART2(void)
 {
@@ -212,10 +213,65 @@ static void configureTimers(void)
   TIM1->CR1 |= TIM_CR1_CEN;
 }
 
+void configureITG(void)
+{
+  using namespace itg3200;
+  I2C_AcknowledgeConfig(I2C1, ENABLE);
+  // Wait for the I2C lines to be free
+  while (I2C_GetFlagStatus(I2C1, I2C_FLAG_BUSY)) {}
+
+  // Generate a I2C Start condition (Master pulls SDA LOW while SCL is HIGH)
+  I2C_GenerateSTART(I2C1, ENABLE);
+  while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_MODE_SELECT)) {}
+
+  // Send the ITG Write address
+  I2C1->DR = ADDR_W;
+  while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED)) {}
+
+  // Send the address of SMPLRT_DIV
+  I2C1->DR = SMPLRT_DIV;
+  while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_BYTE_TRANSMITTING)) {}
+
+  // Sample Rate Divider
+  I2C1->DR = (uint8_t) 0; // no sample rate division
+  while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_BYTE_TRANSMITTING)) {}
+
+  // Set Digital Low Pass Filter
+  I2C1->DR = DLPF_188;
+  while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_BYTE_TRANSMITTING)) {}
+
+  // Configure INT_CFG
+  // I2C1->DR = INT_ANYRD_2CLEAR | ACTL;
+  // Latch interrupts until any register is read, enable data interrupts.
+  // Default interrupt pin mode is push-pull, active high
+  I2C1->DR = LATCH_INT_EN | INT_ANYRD_2CLEAR | RAW_RDY_EN;
+  while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_BYTE_TRANSMITTED)) {}
+
+  // Generate a I2C Repeated start condition
+  I2C_GenerateSTART(I2C1, ENABLE);
+  while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_MODE_SELECT)) {}
+
+  // Send the HMC Write address
+  I2C1->DR = ADDR_W;
+  while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED)) {}
+
+  // Send the address of PWR_MGM
+  I2C1->DR = PWR_MGM;
+  while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_BYTE_TRANSMITTING)) {}
+
+  // Select the X Gyro as the source for the PLL
+  I2C1->DR = CLK_SEL_PLL_X_GYRO;
+  while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_BYTE_TRANSMITTED)) {}
+
+  // Generate a I2C Stop condition (Master releases SDA while SCL is HIGH)
+  I2C_GenerateSTOP(I2C1, ENABLE);
+}
+
 void MCPSystemInit(void)
 {
   configureUSART2();
   configureI2C1();
   configureTimers();
+	configureITG();
 
 }

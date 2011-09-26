@@ -15,9 +15,12 @@ MESSAGE("CMAKE_SYSTEM_PROGRAM_PATH=${CMAKE_SYSTEM_PROGRAM_PATH}")
 
 # Make "Debug" the default build option
 set(CMAKE_BUILD_TYPE "Debug")
+#set(CMAKE_BUILD_TYPE "Release")
 
 # C and C++ flags
-SET(C_CPP_FLAGS "-D'assert_param(expr)=((void)0)' -D${STM32_Device} -Wabi -Wall -Wextra -Wcast-align -Wpointer-arith -Wredundant-decls -Wshadow -Wcast-qual -W -Winline -ffunction-sections -fdata-sections")
+SET(C_CPP_FLAGS "-D'assert_param(expr)=((void)0)' -D${STM32_Device} -Wabi -Wall -Wextra -Wcast-align -Wpointer-arith -Wredundant-decls -Wshadow -Wcast-qual -W -Winline -finline-functions -ffunction-sections -fdata-sections")
+# Assembler option dhlns
+
 # C only flags
 SET(C_ONLY_FLAGS "-Wimplicit -Wnested-externs -std=gnu99")
 # C++ only Flags
