@@ -18,6 +18,7 @@
 // Sample
 #include "sample.h"
 void printSample(Sample &s);
+void resetXBee(int fd);
 
 pthread_mutex_t endTransmissionMutex=PTHREAD_MUTEX_INITIALIZER;
 
@@ -26,8 +27,6 @@ struct serialinfo {
   std::queue<Sample> buf;   // Queue of Sample instances
   std::string filename;     // device filename
   int fd;                   // file descriptor
-	unsigned int Fs;   		    // Data sample frequency
-	unsigned int Fp;   				// Data plot update frequency
 	bool endTransmission;     // End the transmission
 };
 
@@ -37,27 +36,14 @@ void * PortRead(void * arg);
 
 int main(int argc, char **argv)
 {
-  if (argc != 4) {
-    std::cout << "Usage: " << argv[0] << " Device SampleRate PlotRate\n";
-    std::cout << "SampleRate is data rate of incoming Samples\n";
-		std::cout << "FrameRate is plot rate\n";
-    std::cout << "Example: $ " << argv[0] << " /dev/ttyUSB0 200 25\n";
+  if (argc != 2) {
+    std::cout << "Usage: " << argv[0] << " Device\n";
+    std::cout << "Example: $ " << argv[0] << " /dev/ttyUSB0\n";
     return 0;
   }
 	serialinfo usbport;
 	usbport.filename = argv[1]; 		// Set the filename
-	usbport.Fs = atoi(argv[2]); // Set the sample frequency
-	usbport.Fp = atoi(argv[3]); // Set the plot update frequency
 	usbport.endTransmission = false;
-
-	if (usbport.Fs % usbport.Fp) {
-		std::cout << "SampleRate must be an integer multiple of PlotRate\n";
-		return 0;
-	}
-	if ((usbport.Fp <= 0) | (usbport.Fs < usbport.Fp)) {
-		std::cout << "Rate's must be non-negative and SampleRate > PlotRate\n";
-		return 0;
-	}
 
   // Configure usbport for Reading Raw Data
 	setupReadPort(&usbport);
@@ -69,10 +55,10 @@ int main(int argc, char **argv)
     abort();
   }
 
-  sleep(10);
-	pthread_mutex_lock(&endTransmissionMutex);
-	usbport.endTransmission = true;
-	pthread_mutex_unlock(&endTransmissionMutex);
+  //sleep(5);
+	//pthread_mutex_lock(&endTransmissionMutex);
+	//usbport.endTransmission = true;
+	//pthread_mutex_unlock(&endTransmissionMutex);
 
 	void * status;
   if (pthread_join(data_receive_thread, &status)) {
@@ -87,59 +73,52 @@ int main(int argc, char **argv)
 
 void * PortRead(void * arg)
 {
-  serialinfo &port = *((serialinfo *) arg);
-	const unsigned int SamplesPerRead = port.Fs / port.Fp;
-	ssize_t M = SamplesPerRead * sizeof(Sample);
-	uint8_t *buf = new uint8_t[M];
-	size_t SamplesRead = 0;
-
+  serialinfo *port = (serialinfo *) arg;
+	int SamplesRead = 0;
+  static const int N = sizeof(Sample);
 	timespec sleeptime;
 	sleeptime.tv_sec = 0;
-	sleeptime.tv_nsec = (1000000000 / port.Fp);
-	while (1) {
-		ssize_t bytes;
+	sleeptime.tv_nsec = 40000000;  // Delay 40 ms -- 25Hz
 
-		ioctl(port.fd, FIONREAD, &bytes);  // see how many bytes are in the buffer
-		if (bytes < M) {  //  we didn't get all of the data
-			pthread_mutex_lock(&endTransmissionMutex);
-			if (port.endTransmission)
-				pthread_exit((void *)SamplesRead);
-			pthread_mutex_unlock(&endTransmissionMutex);
-			clock_nanosleep(CLOCK_REALTIME, 0, &sleeptime, NULL);
-			continue;
-		}
-		
-		// Since we know there are M or more bytes in the buffer,
-		// hopefully we can read all of them in one call to read.
-		ssize_t n = read(port.fd, (void *) buf, M);
-		if (n == -1) {   // Error occurred
-			std::cout << "read() returned -1.\n";
-			abort();
-		} else if (n != M) {
-			std::cout << "read() returned without retrieving " << M << "bytes\n";
-			abort();
-		}
-		// If we get here, we've read M bytes
-		SamplesRead += SamplesPerRead;
-		for (unsigned int i = 0; i < SamplesPerRead; ++i) {
-			// Create a temporary Sample instance and populated it with the data in buf
-			Sample temp;
-			for (unsigned int j = 0; j < sizeof(Sample); ++j)
-				temp[j] = buf[i*sizeof(Sample) + j];
-			port.buf.push(temp);		// push it into the Queue
-			printSample(temp);
-		}
-	}
+	while (1) {
+		int bytes;
+		ioctl(port->fd, FIONREAD, &bytes);  // see how many bytes are in the buffer
+    if (bytes >= N) {    // we have at least one Sample's worth of bytes in the buffer
+      int SamplesInBuffer = bytes / N;
+      uint8_t * buf = new uint8_t[N * SamplesInBuffer];
+      int n = read(port->fd, (void *) buf, N*SamplesInBuffer);
+
+      if (n != N*SamplesInBuffer) {
+        std::cout << bytes << "read() attempted to read " << N*SamplesInBuffer
+                  << " bytes, but only obtained " << n << " bytes\n";
+        abort();
+      }
+      // At this point we have copied exactly SamplesInBuffer Samples from the
+      // serial port to buf
+      for (int i = 0; i < SamplesInBuffer; ++i) {
+        Sample temp;
+        for (int j = 0; j < N; ++j) {
+          temp[j] = buf[i*N + j];
+        }
+        port->buf.push(temp);
+        printSample(temp);
+      }
+      SamplesRead += SamplesInBuffer;
+      delete [] buf;
+    }
+    clock_nanosleep(CLOCK_REALTIME, 0, &sleeptime, NULL);
+  }
 	return NULL;
 }
 
 void setupReadPort(serialinfo * device)
 {
+  std::string response;
   termios serialConfig;  // termios structure for configuring serial port
-	// Open the device in the following mode
-	     // Read/Write
-			 // don't become this process's controlling terminal,  
-			 // Reads will not  block, see VTIME and VMIN below for details
+  // Open the device in the following mode
+  // Read/Write
+  // don't become this process's controlling terminal,  
+  // Reads will not block, see VTIME and VMIN below for details
 	device->fd = open(device->filename.c_str(), O_RDWR | O_NOCTTY | O_NONBLOCK);
 	if (device->fd == -1) {
 		std::cout << "Unable to open " << device->filename << '\n';
@@ -148,12 +127,12 @@ void setupReadPort(serialinfo * device)
 		std::cout << "Successfully opened " << device->filename << '\n';
 	} // if
 
+	// Get the current attributes of this port
+	tcgetattr(device->fd, &serialConfig);
+
 	// Set input and output baud rate
 	cfsetispeed(&serialConfig, B115200);
 	cfsetospeed(&serialConfig, B115200);
-
-	// Get the current attributes of this port
-	tcgetattr(device->fd, &serialConfig);
 
   // Control modes (8 data bits, No parity bit, 1 stop bit)
   // Reset the following bits:
@@ -194,26 +173,109 @@ void setupReadPort(serialinfo * device)
 	// serialConfig.c_cc[VTIME] = 10;
 
   // Flush input and output buffers and make changes
-	tcsetattr(device->fd, TCSAFLUSH, &serialConfig);         // Set outputs
+	tcsetattr(device->fd, TCSAFLUSH, &serialConfig);
+  
+  resetXBee(device->fd);
+
+  tcflush(device->fd, TCIOFLUSH); // Flush input and output buffers
 
 	std::cout << device->filename << " successfully configured.\n";
-
-  //fcntl(device[0].fd, F_SETOWN, getpid());  // Tell the OS we own this file descriptor
-  //if (fcntl(device[0].fd, F_SETOWN, getpid()) == -1) {
-  //  std::cout << "Unable to set the owner PID\n";
-  //};  // Set the FASYNC bit
-  //int oflags = fcntl(device[0].fd, F_GETFL);    // Get the existing flags
-  //if (fcntl(device[0].fd, F_SETFL, oflags | FASYNC) == -1) {
-  //  std::cout << "Unable to set the FASYNC bit\n";
-  //};  // Set the FASYNC bit
-  // fcntl(device[0].fd, F_SETFL, ~FNONBLOCK);  // Device 0 (read) should block
 }
-
 
 void printSample(Sample &s)
 {
-	std::cout << "Sample Received: {";
-	for (size_t i = 0; i < sizeof(Sample); ++i)
-		std::cout << (int) s[i] << ", ";
-	std::cout << "}\n";
+  static int i = 0;
+  if (i == 0) {
+    std::cout << "Gyro T,Gyro X,Gyro Y,Gyro Z,Acc X,Acc Y,Acc Z,Mag X,Mag Y,"
+                 "Mag Z,Steer,Rear Wheel,Front Wheel,Time,Extra" << std::endl;
+    i = 1;
+  }
+  std::cout << s.gyroT() << ","
+            << s.gyroX() << ","
+            << s.gyroY() << ","
+            << s.gyroZ() << ","
+            << s.accX() << ","
+            << s.accY() << ","
+            << s.accZ() << ","
+            << s.magX() << ","
+            << s.magY() << ","
+            << s.magZ() << ","
+            << s.Steer() << ","
+            << s.RearWheel() << ","
+            << s.FrontWheel() << ","
+            << s.Time() << ","
+            << s.Extra() << std::endl;
+}
+
+void resetXBee(int fd)
+{
+  char buf[10];
+  // Steps:
+  //  - issue '+++' to enter command mode
+  //  - wait for 'OK\r'
+  //  - issue 'ATFR\r' to reset the XBee module
+  //  - wait for 'OK\r'
+  //  - wait 1 second
+  //  - return
+  std::cout << "Issuing XBee reset ..." << std::endl;
+
+  // Enter command mode
+  // buf[0] = buf[1] = buf[2] = '+';
+  int n = write(fd, "+++", 3);
+  if (n == -1) {
+    std::cout << "write() returned -1 when writing '+++' to XBee\n";
+    abort();
+  } else if (n != 3) {
+    std::cout << "write() was unable to write '+++' to XBee\n";
+    abort();
+  }
+  std::cout << "+++" << std::endl;
+
+  // Wait until "OK\r" shows up 
+  n = 0;
+  while (n < 3) {
+    ioctl(fd, FIONREAD, &n);
+  }
+  buf[n] = '\0';
+  int m = read(fd, (void *) buf, n);
+  if (m == -1) {
+    std::cout << "read() returned -1 when reading XBee response.\n";
+    abort();
+  } else if (m != n) {
+    std::cout << "read() tried to read " << n << "characters but only read " << m << '\n';
+    abort();
+  }
+  std::cout << buf << std::endl;
+
+  // Issue an XBee Reset
+  n = write(fd, "ATFR\r", 5);
+  if (n == -1) {
+    std::cout << "write() returned -1 when writing 'ATFR\r' to XBee\n";
+    abort();
+  } else if (n != 5) {
+    std::cout << "write() was unable to write 'ATFR\r' to XBee\n";
+    abort();
+  }
+  std::cout << "ATFR" << std::endl;
+  
+  // Wait until "OK\r" shows up 
+  n = 0;
+  while (n < 3) {
+    ioctl(fd, FIONREAD, &n);
+  }
+  buf[n] = '\0';
+  m = read(fd, (void *) buf, n);
+  if (m == -1) {
+    std::cout << "read() returned -1 when reading XBee response.\n";
+    abort();
+  } else if (m != n) {
+    std::cout << "read() tried to read " << n << "characters but only read " << m << '\n';
+    abort();
+  }
+  std::cout << buf << std::endl;
+
+  timespec sleeptime;
+  sleeptime.tv_sec = 1;
+  sleeptime.tv_nsec = 0;
+  clock_nanosleep(CLOCK_REALTIME, 0, &sleeptime, NULL);
 }
