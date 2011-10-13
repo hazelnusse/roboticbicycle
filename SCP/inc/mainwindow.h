@@ -6,6 +6,9 @@
 QT_BEGIN_NAMESPACE
 class QAction;
 class QMenu;
+class XBeeDialog;
+class QFile;
+class QDataStream;
 QT_END_NAMESPACE
 
 class PlotWidget;
@@ -26,6 +29,11 @@ private:
   void createMenus();
   void createStatusBar();
   void createPlot();
+  void createXBeeDialog();
+
+  QFile *xbFile;
+  QDataStream *xbStream;
+  XBeeDialog *xbDialog;
 
   QMenu *helpMenu;
   QMenu *commMenu;

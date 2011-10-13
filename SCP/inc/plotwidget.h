@@ -18,7 +18,7 @@ class PlotWidget : public QWidget
  Q_OBJECT
 
  public:
-  PlotWidget(QWidget *parent = 0);
+  PlotWidget(QWidget *par = 0);
 
  protected:
   // void paintEvent(QPaintEvent *event);

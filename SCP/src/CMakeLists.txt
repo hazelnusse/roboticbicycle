@@ -8,9 +8,11 @@ include_directories(${PROJECT_SOURCE_DIR}/../MCP/inc
 set(scp_sources main.cc
                 mainwindow.cc
                 plotwidget.cc
+                xbeedialog.cc
                 ${PROJECT_SOURCE_DIR}/../MCP/src/sample.cc)
 
 set(scp_headers ${PROJECT_SOURCE_DIR}/inc/mainwindow.h
+                ${PROJECT_SOURCE_DIR}/inc/xbeedialog.h
                 ${PROJECT_SOURCE_DIR}/inc/plotwidget.h)
 
 qt4_wrap_cpp(scp_headers_moc ${scp_headers})

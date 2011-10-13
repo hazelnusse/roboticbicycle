@@ -11,8 +11,8 @@
 
 #include "plotwidget.h"
 
-PlotWidget::PlotWidget(QWidget *parent)
-  : QWidget(parent),
+PlotWidget::PlotWidget(QWidget *par)
+  : QWidget(par),
     view(vtkSmartPointer<vtkContextView>::New()),
     table(vtkSmartPointer<vtkTable>::New()),
     gt(vtkSmartPointer<vtkShortArray>::New()),
