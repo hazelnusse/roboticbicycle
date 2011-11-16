@@ -30,7 +30,7 @@ Resources
 
 
 GNU Toolchain
------------------
+-------------
 I've been using `Summon Arm Toolchain (SAT)Summon Arm Toolchain (SAT)
 <http://github.com/esden/summon-arm-toolchain>`_ to build gcc, gdb, newlib,
 binutils, and openocd.  The versions of all those tools in the master branch of
@@ -45,3 +45,7 @@ been using the following version of the toolchain:
 
 The only non open sourced part of this project is the STM32 standard peripheral
 library.  It is free, but not OSI compliant.
+
+Build System
+------------
+CMake is used for compilation.  CMake 2.8 or later is required.
