@@ -11,7 +11,7 @@ The following is a list of the electrical hardware used on the bicycle:
 - Steer motor: `Teknic M-3441 <http://www.teknic.com/files/product_info/N34_Industrial_Grade_Motors_v3.2.pdf>`_
 - Geared (4.7:1) rear hub motor: `Amped Bikes Rear Geared Kit <http://ampedbikes.com/kits.html>`_
 - Wheel Encoders: `US Digital H5-50-N-D <http://usdigital.com/assets/general/119_h5_datasheet_1.pdf>`_
-- Inertial Measurement Unit: `<http://www.sparkfun.com/products/10321>`_
+- Inertial Measurement Unit: `Stick IMU <http://www.sparkfun.com/products/10321>`_
 - Microcontroller:
     - `Olimex STM32 H-107 <http://www.olimex.com/dev/pdf/ARM/ST/STM32-H107.pdf>`_
     - `STM32F107VC Datasheet <http://www.st.com/internet/com/TECHNICAL_RESOURCES/TECHNICAL_LITERATURE/DATASHEET/CD00220364.pdf>`_
