@@ -1,9 +1,12 @@
 #include <QtGui>
 #include <QFile>
+#include <QQueue>
+#include <QTimer>
 
 #include "mainwindow.h"
 #include "plotwidget.h"
 #include "xbeedialog.h"
+#include "datareader.h"
 
 MainWindow::MainWindow()
 {
@@ -11,11 +14,22 @@ MainWindow::MainWindow()
   createMenus();
   createStatusBar();
 
-  xbFile = new QFile;
-  xbStream = new QDataStream(xbFile);
-
   createPlot();
-  createXBeeDialog();
+
+  createXBeeData();   // Sets up the xbStream and SampleQueue
+  createXBeeDialog(); // Setups the dialog
+  createTimer();
+  createDataReader();
+}
+
+MainWindow::~MainWindow()
+{
+  if (xbFile->isOpen())
+    xbFile->close();
+
+  delete xbStream;
+  delete xbFile;
+  delete SampleQueue;
 }
 
 void MainWindow::about()
@@ -45,11 +59,11 @@ void MainWindow::createActions()
 
 void MainWindow::createMenus()
 {
-    commMenu = menuBar()->addMenu(tr("&Communication"));
-    commMenu->addAction(connectXBeeAct);
+  commMenu = menuBar()->addMenu(tr("&Communication"));
+  commMenu->addAction(connectXBeeAct);
 
-    helpMenu = menuBar()->addMenu(tr("&Help"));
-    helpMenu->addAction(aboutAct);
+  helpMenu = menuBar()->addMenu(tr("&Help"));
+  helpMenu->addAction(aboutAct);
 }
 
 void MainWindow::createStatusBar()
@@ -63,7 +77,37 @@ void MainWindow::createPlot()
   setCentralWidget(dataPlot);
 }
 
+void MainWindow::createTimer()
+{
+  PlotUpdateTimer = new QTimer(this);
+  PlotUpdateTimer->setInterval(1000);
+  PlotUpdateTimer->setSingleShot(false);
+}
+
+void MainWindow::createDataReader()
+{
+  reader = new DataReader(this, SampleQueue);
+  connect(PlotUpdateTimer, SIGNAL(timeout()), reader, SLOT(read()));
+}
+
+void MainWindow::createXBeeData()
+{
+  xbFile = new QFile;
+  xbStream = new QDataStream(xbFile);
+  SampleQueue = new QQueue<Sample>;
+}
+
 void MainWindow::createXBeeDialog()
 {
   xbDialog = new XBeeDialog(xbStream, this);
+}
+
+QTimer * MainWindow::timer() const
+{
+  return PlotUpdateTimer;
+}
+
+DataReader * MainWindow::dataReader() const
+{
+  return reader;
 }

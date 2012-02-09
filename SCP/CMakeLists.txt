@@ -13,7 +13,7 @@ set(CMAKE_CXX_FLAGS_DEBUG "${C_CPP_FLAGS} ${CPP_ONLY_FLAGS} -ggdb3 -O0")
 
 # Release flags
 set(CMAKE_CXX_FLAGS_RELEASE "${C_CPP_FLAGS} ${CPP_ONLY_FLAGS} -ggdb3 -O3")
-    
+
 # Find Qt4
 find_package(Qt4 REQUIRED)
 

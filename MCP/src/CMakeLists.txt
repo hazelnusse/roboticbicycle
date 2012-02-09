@@ -5,7 +5,7 @@ include_directories(${PROJECT_SOURCE_DIR}/stm32/inc
 
 add_library(MCPtasks MCPtasks.cc)
 
-add_executable(main main.cc peripheral_init.cc startup_STM32F10X_CL.s)
+add_executable(main main.cc sample.cc peripheral_init.cc startup_STM32F10X_CL.s)
 target_link_libraries(main stm32 FreeRTOS MCPtasks)
 objcopy_file(main)
 objdump_file(main)

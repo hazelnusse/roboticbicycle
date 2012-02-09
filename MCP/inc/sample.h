@@ -5,6 +5,9 @@
 
 class Sample {
  public :
+  // Constructor
+  Sample();
+
   // Gyroscope Measurements
   int16_t gyroT(void) const;             // Getter
   int16_t gyroX(void) const;             // Getter
@@ -42,12 +45,12 @@ class Sample {
   void Steer(uint16_t val);              // Setter
   
   // Rear Wheel Measurement
-  uint16_t RearWheel(void) const;        // Getter
-  void RearWheel(uint16_t val);          // Setter
+  int16_t RearWheel(void) const;         // Getter
+  void RearWheel(int16_t val);           // Setter
 
   // Front Wheel Measurement
-  uint16_t FrontWheel(void) const;       // Getter
-  void FrontWheel(uint16_t val);         // Setter
+  int16_t FrontWheel(void) const;        // Getter
+  void FrontWheel(int16_t val);          // Setter
 
   // Sample Time
   void Time(uint32_t val);               // Setter
@@ -218,7 +221,7 @@ int16_t Sample::magY(void) const
 inline
 int16_t Sample::magZ(void) const
 {
-  return int16_t((data[my_h] << 8) | data[my_l]);
+  return int16_t((data[mz_h] << 8) | data[mz_l]);
 }
 
 inline
@@ -259,6 +262,62 @@ void Sample::magXYZ(const int16_t ar[3])
   magZ(ar[2]);
 }
 
+// Steer Getter
+inline
+uint16_t Sample::Steer(void) const
+{
+  return uint16_t((data[st_h] << 8) | data[st_l]);
+}
+
+// Steer Setter
+inline
+void Sample::Steer(uint16_t val)
+{
+  data[st_h] = uint8_t(val >> 8);
+  data[st_l] = uint8_t(val);
+}
+
+// Rear Wheel Getter
+inline
+int16_t Sample::RearWheel(void) const
+{
+  return int16_t((data[rw_h] << 8) | data[rw_l]);
+}
+
+// Rear Wheel Setter
+inline
+void Sample::RearWheel(int16_t val)
+{
+  data[rw_h] = uint8_t(val >> 8);
+  data[rw_l] = uint8_t(val);
+}
+
+// Front Wheel Getter
+inline
+int16_t Sample::FrontWheel(void) const
+{
+  return int16_t((data[fw_h] << 8) | data[fw_l]);
+}
+
+// Front Wheel Setter
+inline
+void Sample::FrontWheel(int16_t val)
+{
+  data[fw_h] = uint8_t(val >> 8);
+  data[fw_l] = uint8_t(val);
+}
+
+// Time Getter
+inline
+uint32_t Sample::Time(void) const
+{
+  return uint32_t((data[t_hh] << 24)
+                | (data[t_hl] << 16)
+                | (data[t_lh] << 8)
+                |  data[t_ll]);
+}
+
+// Time Setter
 inline
 void Sample::Time(uint32_t val)
 {
@@ -273,54 +332,6 @@ void Sample::Extra(int16_t val)
 {
   data[e_h] = uint8_t(val >> 8);
   data[e_l] = uint8_t(val);
-}
-
-inline
-void Sample::Steer(uint16_t val)
-{
-  data[st_h] = uint8_t(val >> 8);
-  data[st_l] = uint8_t(val);
-}
-
-inline
-void Sample::RearWheel(uint16_t val)
-{
-  data[rw_h] = uint8_t(val >> 8);
-  data[rw_l] = uint8_t(val);
-}
-
-inline
-void Sample::FrontWheel(uint16_t val)
-{
-  data[fw_h] = uint8_t(val >> 8);
-  data[fw_l] = uint8_t(val);
-}
-
-inline
-uint16_t Sample::Steer(void) const
-{
-  return uint16_t((data[st_h] << 8) | data[st_l]);
-}
-
-inline
-uint16_t Sample::RearWheel(void) const
-{
-  return uint16_t((data[rw_h] << 8) | data[rw_l]);
-}
-
-inline
-uint16_t Sample::FrontWheel(void) const
-{
-  return uint16_t((data[fw_h] << 8) | data[fw_l]);
-}
-
-inline
-uint32_t Sample::Time(void) const
-{
-  return uint32_t((data[27] << 24)
-                | (data[28] << 16)
-                | (data[29] << 8)
-                |  data[30]);
 }
 
 inline

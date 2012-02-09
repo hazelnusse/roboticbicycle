@@ -12,6 +12,10 @@ class vtkShortArray;
 class vtkUnsignedShortArray;
 class vtkChartXY;
 class vtkPlot;
+QT_BEGIN_NAMESPACE
+class QSpinBox;
+class QGroupBox;
+QT_END_NAMESPACE
 
 class PlotWidget : public QWidget
 {
@@ -22,8 +26,17 @@ class PlotWidget : public QWidget
 
  protected:
   // void paintEvent(QPaintEvent *event);
+ 
+ private slots:
+  void DataPointsChanged();
 
  private:
+  void createSignalGroup();
+  void createPlotWidget();
+
+  QSpinBox *dataPoints;
+  QVTKWidget *qvtkWidget;
+  QGroupBox *signalsGroup;
   vtkSmartPointer<vtkContextView> view;
   vtkSmartPointer<vtkTable> table;
   vtkSmartPointer<vtkShortArray> gt, gx, gy, gz, ax, ay, az, mx, my, mz;

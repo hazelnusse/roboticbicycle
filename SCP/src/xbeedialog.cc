@@ -7,6 +7,8 @@
 #include <sys/ioctl.h>
 
 #include "xbeedialog.h"
+#include "mainwindow.h"
+#include "datareader.h"
 
 XBeeDialog::XBeeDialog(QDataStream *stream, QWidget *par)
   : QDialog(par),
@@ -53,11 +55,16 @@ void XBeeDialog::OpenClicked()
   if (dialog.exec())
     fileNames = dialog.selectedFiles();
 
+  // Get the file associated with the data stream
   QFile *file = static_cast<QFile *>(xbStream->device());
   if (fileNames.size()) {
-    // Close the file if it is already open.
-    if (file->isOpen())
+    // Close the file and disconnect the datastream if it is already open.
+    MainWindow * par = static_cast<MainWindow *>(parent());
+    if (file->isOpen()) {
+      par->dataReader()->disconnectFromStream();
+      par->timer()->stop();
       file->close();
+    }
 
     // Set the filename and open the file
     file->setFileName(fileNames.at(0));
@@ -66,11 +73,16 @@ void XBeeDialog::OpenClicked()
       CloseButton->setEnabled(true);
       ResetButton->setEnabled(true);
       fileNameLabel->setText(file->fileName());
+      // Turn on the Timer that checks for new samples
+      par->dataReader()->connectToStream(xbStream);
+      par->timer()->start();
     } else {
       QMessageBox msgBox;
       msgBox.setText(tr("Unable to open file: ").append(file->fileName()));
       msgBox.exec();
       file->setFileName("");
+      par->dataReader()->disconnectFromStream();
+      par->timer()->stop();
       CloseButton->setEnabled(false);
       ResetButton->setEnabled(false);
     }
@@ -79,6 +91,7 @@ void XBeeDialog::OpenClicked()
 
 void XBeeDialog::ResetClicked()
 {
+  static_cast<MainWindow *>(parent())->timer()->stop();
   QFile *file = static_cast<QFile *>(xbStream->device());
   if (file->isOpen()) {
     file->flush();
@@ -86,10 +99,13 @@ void XBeeDialog::ResetClicked()
   } else {
     std::cerr << "File is closed!!!???" << std::endl;
   }
+  static_cast<MainWindow *>(parent())->timer()->start();
 } // ResetClicked()
 
 void XBeeDialog::CloseClicked()
 {
+  static_cast<MainWindow *>(parent())->timer()->stop();
+
   QFile *file = static_cast<QFile *>(xbStream->device());
   file->close(); 
   if (file->isOpen()) {

@@ -31,7 +31,46 @@ PlotWidget::PlotWidget(QWidget *par)
     t(vtkSmartPointer<vtkUnsignedShortArray>::New()),
     chart(vtkSmartPointer<vtkChartXY>::New())
 {
-  QVTKWidget *qvtkWidget = new QVTKWidget(this);
+  createSignalGroup();
+  createPlotWidget();
+
+  QVBoxLayout *l = new QVBoxLayout(this);
+  l->addWidget(qvtkWidget);
+  l->addWidget(signalsGroup);
+  setLayout(l);
+}
+
+void PlotWidget::createSignalGroup()
+{
+  signalsGroup = new QGroupBox(tr("Signal selection"));
+  QCheckBox *gyroCheckBox = new QCheckBox(tr("Gyroscope"));
+  QCheckBox *accCheckBox = new QCheckBox(tr("Accelerometer"));
+  QCheckBox *magCheckBox = new QCheckBox(tr("Magnetometer"));
+  QCheckBox *steerCheckBox = new QCheckBox(tr("Steer"));
+  QCheckBox *rearWheelCheckBox = new QCheckBox(tr("Rear Wheel"));
+  QCheckBox *frontWheelCheckBox = new QCheckBox(tr("Front Wheel"));
+
+  QLabel *dataPointsLabel = new QLabel(tr("Number of Samples"));
+  dataPoints = new QSpinBox;
+  dataPoints->setMaximum(20000);
+  dataPoints->setMinimum(600);
+  dataPoints->setValue(1000);
+
+  QGridLayout *signalsLayout = new QGridLayout;
+  signalsLayout->addWidget(gyroCheckBox, 0, 0);
+  signalsLayout->addWidget(accCheckBox, 0, 1);
+  signalsLayout->addWidget(magCheckBox, 0, 2);
+  signalsLayout->addWidget(dataPointsLabel, 0, 3);
+  signalsLayout->addWidget(steerCheckBox, 1, 0);
+  signalsLayout->addWidget(rearWheelCheckBox, 1, 1);
+  signalsLayout->addWidget(frontWheelCheckBox, 1, 2);
+  signalsLayout->addWidget(dataPoints, 1, 3);
+  signalsGroup->setLayout(signalsLayout);
+}
+
+void PlotWidget::createPlotWidget()
+{
+  qvtkWidget = new QVTKWidget(this);
 
   view->SetInteractor(qvtkWidget->GetInteractor());
   qvtkWidget->SetRenderWindow(view->GetRenderWindow());
@@ -51,42 +90,31 @@ PlotWidget::PlotWidget(QWidget *par)
   fw->SetName("Front wheel"); table->AddColumn(fw);
   t->SetName("Time"); table->AddColumn(t);
 
-  // Test charting with a few more points...
-  int numPoints = 200;
-  table->SetNumberOfRows(numPoints);
+
+  int numPoints = dataPoints->value();
+  table->SetNumberOfRows(dataPoints->value());
   for (int i = 0; i < numPoints; ++i) {
-    for (int j = 0; j < 13; ++j) {
-        table->SetValue(i, j, i*j);
+    int j;
+    for (j = 0; j < 13; ++j) {
+        table->SetValue(i, j, j);
     }
+    table->SetValue(i, j, i);
+
   }
   table->Update();
 
+  vtkPlot *lines[13];
+  for (int j = 0; j < 13; ++j) {
+    lines[j] = chart->AddPlot(vtkChart::LINE);
+    lines[j]->SetInput(table, 13, j);
+    lines[j]->SetColor(255, 0, 0, 255);
+  }
   view->GetScene()->AddItem(chart);
+  chart->SetShowLegend(true);
+}
 
-  line = chart->AddPlot(vtkChart::LINE);
-  line->SetInput(table, 12, 1);
-  line->SetColor(255, 0, 0, 255);
-
-  QGroupBox *signalsGroup = new QGroupBox(tr("Signal selection"));
-  QCheckBox *gyroCheckBox = new QCheckBox(tr("Gyroscope"));
-  QCheckBox *accCheckBox = new QCheckBox(tr("Accelerometer"));
-  QCheckBox *magCheckBox = new QCheckBox(tr("Magnetometer"));
-  QCheckBox *steerCheckBox = new QCheckBox(tr("Steer"));
-  QCheckBox *rearWheelCheckBox = new QCheckBox(tr("Rear Wheel"));
-  QCheckBox *frontWheelCheckBox = new QCheckBox(tr("Front Wheel"));
-
-  QVBoxLayout *signalsLayout = new QVBoxLayout;
-  signalsLayout->addWidget(gyroCheckBox);
-  signalsLayout->addWidget(accCheckBox);
-  signalsLayout->addWidget(magCheckBox);
-  signalsLayout->addWidget(steerCheckBox);
-  signalsLayout->addWidget(rearWheelCheckBox);
-  signalsLayout->addWidget(frontWheelCheckBox);
-  signalsGroup->setLayout(signalsLayout);
-
-  QHBoxLayout *l = new QHBoxLayout(this);
-  l->addWidget(qvtkWidget);
-  l->addWidget(signalsGroup);
-
-  setLayout(l);
+void PlotWidget::DataPointsChanged()
+{
+  table->SetNumberOfRows(dataPoints->value());
+  table->Update();
 }

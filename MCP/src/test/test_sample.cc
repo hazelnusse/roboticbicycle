@@ -7,6 +7,7 @@ int main(void)
 
   while(1)
   {
+    z = x*y;
     x = a.magX();
     y = x + a.magY();
     z = x + y;
