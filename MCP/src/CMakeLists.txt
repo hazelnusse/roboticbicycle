@@ -12,3 +12,6 @@ objdump_file(main)
 symbol_table(main)
 
 add_subdirectory(test)
+
+add_executable(steercalibration steercalibration.cc startup_STM32F10X_CL.s)
+target_link_libraries(stm32)
