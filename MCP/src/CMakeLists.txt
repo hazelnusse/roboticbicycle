@@ -13,5 +13,8 @@ symbol_table(main)
 
 add_subdirectory(test)
 
-add_executable(steercalibration steercalibration.cc startup_STM32F10X_CL.s)
-target_link_libraries(stm32)
+add_executable(steer_calibration steer_calibration.cc startup_STM32F10X_CL.s)
+target_link_libraries(steer_calibration stm32)
+objcopy_file(steer_calibration main)
+objdump_file(steer_calibration main)
+symbol_table(steer_calibration main)
